@@ -1,0 +1,56 @@
+- hosts: localhost 
+  tasks:
+  - name : mounting dvd
+    mount :
+      src : "/dev/cdrom"
+      path : "/dvd"
+      state : mounted
+      fstype : "iso9660"
+
+  - name : Local repo
+    yum_repository :
+      name : yum1
+      description : "local repo"
+      baseurl : "/dvd/AppStream"
+      gpgcheck : 0
+
+  - name : Local repo2
+    yum_repository : 
+      name : yum2
+      description : "local repo 2"
+      baseurl : "/dvd/BaseOS"
+      gpgcheck : 0
+
+
+  - name : Yum repo for docker
+    yum_repository :
+      name : docker
+      description : "docker repo for yum"
+      baseurl : "https://download.docker.com/linux/centos/7/x86_64/stable/"
+      gpgcheck : no
+
+  - name : Net tools
+    yum :
+      name : net-tools
+      state : latest
+
+  - name : Running docker-ce installation command 
+    shell : "yum install docker-ce --nobest -y"
+
+  - name : starting docker services
+    service : 
+      name : docker
+      state : started
+      enabled : yes
+
+  - name : insatlling basic utils
+    yum :
+      name : "yum-utils,python3"
+      state : latest
+
+  
+  - name: python interpreter for docker
+    pip : 
+     name : "docker"
+
+

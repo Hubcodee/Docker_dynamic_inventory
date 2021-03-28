@@ -1,0 +1,19 @@
+- hosts : docker_hosts
+  become : true
+  tasks :
+  - name : "Setting up webserver"
+    package :
+      name : httpd
+      state : present
+
+  - name : "Copying webpages to docker conatiner"
+    copy :
+      src : index.html
+      dest : /var/www/html/
+   
+
+  - name : "Starting httpd server"
+    command : "/usr/sbin/httpd"
+
+
+

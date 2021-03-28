@@ -1,0 +1,51 @@
+- hosts: localhost
+  become : true
+  vars :
+  - image : "ssh_os:v1"
+  vars_prompt:
+  - name : cont_name
+    prompt : "Enter container name :" 
+    private : no
+  - name : ssh_port
+    prompt : "Enter custom ssh port no : "
+    private : no
+  - name : web_port
+    prompt : "Enter custom exposed port for web : "
+    private : no
+
+  tasks:
+  - name : "Initiating docker services"
+    service :
+      name : docker
+      state : started
+
+  - name : "Launching container : "
+    docker_container :
+      name : "{{ cont_name }}"
+      image : "{{ image }}"
+      state : started
+      interactive : yes
+      tty : yes
+      ports :
+      -  "{{ web_port }}:80"
+      -   "{{ ssh_port }}:22"
+    register : container
+
+    #  - name: "Debug"
+    #debug :
+    # msg : "{{ container }}"   
+
+    # - name : "Inspecting docker conatiner network settings"
+    # debug :
+    # var : "{{ container }}.container.NetworkSettings.IPAddress "
+
+  - name : "inventory updation"
+    blockinfile : 
+      path : /etc/ansible/dock_ip.txt
+      block : |
+        [docker_hosts]
+        {{ container['container']['NetworkSettings']['IPAddress'] }} ansible_ssh_user=root ansible_ssh_pass=docker ansible_connection=ssh
+
+         
+ 
+
